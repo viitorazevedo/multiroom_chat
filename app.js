@@ -8,6 +8,8 @@ var server = app.listen(60, function(){
 
 var io = require('socket.io').listen(server);
 
+app.set('io', io);
+
 /* Criar a conexão por websocket */ 
 io.on('connection', function(socket){
     console.log('Usuário conectou');
@@ -16,6 +18,29 @@ io.on('connection', function(socket){
     socket.on('disconnect', function(){
         console.log('Usuário desconectou');
 
-    })
-});
+    });
 
+    socket.on('msgParaServidor', function(data){
+
+        /* dialogo */
+        socket.emit('msgParaCliente', {apelido: data.apelido, mensagem: data.mensagem}
+        );
+
+        socket.broadcast.emit('msgParaCliente', {apelido: data.apelido, mensagem: data.mensagem}
+        );
+       
+       
+        /* participantes */ 
+        if(parseInt(apelido_atualizado_nos_clientes) == 0){
+        socket.emit(
+        'participantesParaCliente', 
+        {apelido: data.apelido}
+        );
+
+        socket.broadcast.emit(
+            'participantesParaCliente', 
+            {apelido: data.apelido}
+            );
+        }
+    });
+});
